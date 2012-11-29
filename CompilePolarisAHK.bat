@@ -1,0 +1,1 @@
+.\AutoHotKey\Ahk2Exe.exe /in "ahk/Polaris.ahk" /icon "Polaris.ico" /mpress 1 /out "./exe/PolarisAHK.exe"
