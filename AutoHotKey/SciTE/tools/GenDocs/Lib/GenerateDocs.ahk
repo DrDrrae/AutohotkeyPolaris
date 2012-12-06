@@ -147,12 +147,18 @@ Parse_Common(item, prefix, ByRef type, ByRef syntax, ByRef name, ByRef isConstr,
 					throw Exception("You must specify [get], [set] or [get/set]!")
 			}else isGet := 0
 		}else isSet := 0
+		pos := InStr(name, "[")
+		if pos
+		{
+			extra := SubStr(name, pos)
+			name := SubStr(name, 1, pos - 1)
+		}
 		name := Trim(name)
 		syntax := ""
 		if isGet
-			syntax .= "OutputVar := " name "`n"
+			syntax .= "OutputVar := " name extra "`n"
 		if isSet
-			syntax .= name " := Value`n"
+			syntax .= name extra " := Value`n"
 		StringTrimRight, syntax, syntax, 1
 		StringReplace, syntax, syntax, `r, <br/>
 	}
@@ -270,6 +276,8 @@ Generate_Class(item, prefix="")
 
 	<h1>%name% Class</h1>
 	)
+	if item.inherits
+		filetext .= "`n<p>(Inherits from <a href=""" item.inherits ".html"">" item.inherits "</a>)</p>"
 	filetext .= "`n" Markdown2HTML(item.description)
 	
 	if !isShort
@@ -376,6 +384,8 @@ GenerateShort_Class(ByRef filetext, item, prefix)
 {
 	name := item.name
 	filetext .= "`n`n<div class=""methodShort"" id=""" name """><h2>" name " Class</h2>"
+	if item.inherits
+		filetext .= "`n<p>(Inherits from <a href=""" item.inherits ".html"">" item.inherits "</a>)</p>"
 	filetext .= "`n" Markdown2HTML(item.description)
 	for each,it in item.contents
 	{

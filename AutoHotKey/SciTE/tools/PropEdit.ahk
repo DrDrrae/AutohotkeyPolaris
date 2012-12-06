@@ -11,18 +11,14 @@ SetWorkingDir, %A_ScriptDir%
 
 Menu, Tray, Icon, ..\toolicon.icl, 17
 
-IsPortable := FileExist(A_ScriptDir "\..\$PORTABLE")
-if !IsPortable
-	LocalSciTEPath = %A_MyDocuments%\AutoHotkey\SciTE
-else
-	LocalSciTEPath = %A_ScriptDir%\..\user
-
 scite := GetSciTEInstance()
 if !scite
 {
 	MsgBox, 16, SciTE properties editor, Can't find SciTE!
 	ExitApp
 }
+
+LocalSciTEPath := scite.UserDir
 
 UserPropsFile = %LocalSciTEPath%\_config.properties
 
@@ -172,14 +168,14 @@ CountLocalesAndChoose(ByRef choosenum)
 	return list
 }
 
-FindInList(ByRef list, item, delim="|")
+FindInList(ByRef list, item, delim := "|")
 {
 	Loop, Parse, list, %delim%
 		if (A_LoopField = item)
 			return A_Index
 }
 
-GetItem(ByRef list, id, delim="|")
+GetItem(ByRef list, id, delim := "|")
 {
 	Loop, Parse, list, %delim%
 		if (A_Index = id)

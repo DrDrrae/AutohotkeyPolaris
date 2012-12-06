@@ -1,35 +1,28 @@
 # SciTE session file
 
-position.left=100
-position.top=102
+position.left=327
+position.top=99
 position.width=1080
 position.height=723
-position.maximize=1
+position.maximize=0
 
-mru.1.path=C:\Users\lostaff\Polaris.bat
-mru.2.path=Z:\Polaris.bat
-mru.3.path=Z:\ahk\HoldMaterial.ahk
-mru.4.path=Z:\ahk\polaris.ahk
-mru.5.path=Z:\settings.ini
-mru.6.path=Z:\ahk\Unavailable.ahk
-mru.7.path=\\AO-NTSERV1\Departments\Parkville\Staff Folders\Andrea\settings.ini
-mru.8.path=Z:\ahk\setup.ahk
+mru.1.path=Z:\Polaris.bat
+mru.2.path=\\AO-NTSERV1\Departments\Parkville\Staff Folders\Andrea\settings.ini
+mru.3.path=Z:\ahk\DirectReader.ahk
+mru.4.path=Z:\ahk\Unavailable.ahk
+mru.5.path=Z:\ahk\HoldMaterial.ahk
+mru.6.path=Z:\settingsDefault.ini
+mru.7.path=Z:\ahk\Select.ahk
+mru.8.path=Z:\ahk\polaris.ahk
+mru.9.path=Z:\settings.ini
+mru.10.path=Z:\ahk\setup.ahk
 
-buffer.1.path=Z:\ahk\HoldMaterial.ahk
-buffer.1.position=7737
+buffer.1.path=Z:\ahk\polaris.ahk
+buffer.1.position=3814
 
-buffer.2.path=Z:\ahk\polaris.ahk
-buffer.2.position=4006
-buffer.2.current=1
+buffer.2.path=Z:\settings.ini
+buffer.2.position=586
 
-buffer.3.path=Z:\settings.ini
-buffer.3.position=925
-
-buffer.4.path=Z:\ahk\Unavailable.ahk
-buffer.4.position=644
-
-buffer.5.path=\\AO-NTSERV1\Departments\Parkville\Staff Folders\Andrea\settings.ini
-buffer.5.position=1
-
-buffer.6.path=Z:\ahk\setup.ahk
-buffer.6.position=2553
+buffer.3.path=Z:\ahk\setup.ahk
+buffer.3.position=2493
+buffer.3.current=1
