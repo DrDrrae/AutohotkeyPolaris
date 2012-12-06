@@ -1,10 +1,10 @@
 #NoEnv
 #SingleInstance force
-keyDelay := 25
-i := 0
+keyDelay = 25
+i = 0
 OutputVar := ""
-ItemRecordIterations := 10
-controlDelay := 40
+ItemRecordIterations = 10
+controlDelay = 40
 directReaderOn := ""
 checkDirectReader := ""
 StartTime := ""
@@ -208,16 +208,46 @@ else
 }
 
 IniRead, Libraries, %settings%
-StringReplace, Libraries, Libraries, `n, |, UseErrorLevel
-libraryCount := ErrorLevel
-StringReplace, Libraries, Libraries, |, ||
+IniRead, DefaultLibrary, %settings%, Default, Library
+StringReplace, Libraries, Libraries, Default`n
+;Loop, Parse, InputVar [, Delimiters, OmitChars] 
+libEnabled = 0
+libraryCount = 0
+Loop, Parse, Libraries, `n
+{
+	IniRead, libEnabled, %settings%, %A_LoopField%, Enabled, 0
+	if (libEnabled = 1)
+	{
+		if (libraryCount > 0)
+		{
+			Libraries2 = %Libraries2%|%A_LoopField%
+		}
+		else
+		{
+			Libraries2 = %A_LoopField%	
+		}
+		libraryCount++
+	}
+}
+Sort Libraries2, CL D|
 
+if (InStr(Libraries2,DefaultLibrary)>0)
+{
+	StringReplace, Libraries2, Libraries2, %DefaultLibrary%, %DefaultLibrary%|
+}
+else
+{
+	StringReplace, Libraries2, Libraries2, |, ||
+}
+
+libraryCountLabel:
 if (libraryCount > 0)
 {
 	Gui, Library:Add, Text, x12 y10 w380 h30 , Pick a Baltimore County Public Library Branch
 	Gui, Library:Add, Text, x12 y35 w380 h30 , The branches are pulled from the settings.ini file.
 	Gui, Library:Add, Text, x12 y65 w380 h20 , Library:
-	Gui, Library:Add, DropDownList, x12 y80 w380 vLibrary, %Libraries%
+	Gui, Library:Add, DropDownList, x12 y80 w320 vLibrary, %Libraries2%
+	Gui, Library:Add, Button, x340 y80 w40 h20 gLibraryButtonEdit, &Edit
 	Gui, Library:Add, Button, x12 y110 w90 h30 Default gLibraryButtonOK, &OK
 	Gui, Library:Add, Button, x157 y110 w90 h30 gLibraryButtonSetup , &Setup
 	Gui, Library:Add, Button, x302 y110 w90 h30 gLibraryButtonCancel, &Cancel
@@ -226,7 +256,7 @@ if (libraryCount > 0)
 }
 else
 {
-	Library = %Libraries%
+	Library = %Libraries2%
 	;MsgBox %Library%
 	Goto, LibrarySkip
 }
@@ -236,47 +266,58 @@ LibraryGuiEscape:
 LibraryButtonCancel:
 	Gui, Library:Destroy
 	ExitApp
-
+	
 LibraryButtonSetup:
+	Gui, Library:Submit
+	Gui, Library:Destroy
+	IniRead, librarySetup, %settings%
+	SetupRetry:
+	Gui, Setup:Add, Text, x12 y10 w380 h30 , Enable or disable libraries.
+	Gui, Setup:Add, Text, x12 y33 w380 h20 , Catalog Changes:
+	Gui, Setup:Add, Checkbox, x12 y33 w380 h20 vEditArbutus, Arbutus
+	Gui, Setup:Add, Button, x12 y110 w90 h30 Default gSetupButtonOK, &OK
+	Gui, Setup:Add, Button, x157 y110 w90 h30 Disabled gSetupButtonDone , &Done
+	Gui, Setup:Add, Button, x302 y110 w90 h30 gSetupButtonCancel, &Cancel
+	Gui, Setup:Show, x127 y87 h160 w404, Pick a Library
+	Return
+	
+	SetupButtonOK:
+	SetupButtonDone:
+	SetupButtonCancel:
+	ExitApp
+
+LibraryButtonEdit:
 	Gui, Library:Submit
 	Gui, Library:Destroy
 	IniRead, CCCN, %settings%, %Library%, CatalogChangesCardNumber, %A_Space%
 	IniRead, HSCN, %settings%, %Library%, HoldShelfCardNumber, %A_Space%
 	IniRead, PMCN, %settings%, %Library%, ProblemMaterialCardNumber, %A_Space%
 
-	SetupRetry:
-	Gui, Setup:Add, Text, x12 y10 w380 h30 , Setup the various cards for %Library%
-	Gui, Setup:Add, Text, x12 y33 w380 h20 , Catalog Changes:
-	Gui, Setup:Add, Edit, x100 y33 w292 h20 Limit14 vCCCN Number, %CCCN%
-	Gui, Setup:Add, Text, x12 y58 w380 h20 , Hold Shelf:
-	Gui, Setup:Add, Edit, x100 y58 w292 h20 Limit14 vHSCN Number, %HSCN%
-	Gui, Setup:Add, Text, x12 y83 w380 h20 , Problem Material:
-	Gui, Setup:Add, Edit, x100 y83 w292 h20 Limit14 vPMCN Number, %PMCN%
-	Gui, Setup:Add, Button, x12 y110 w90 h30 Default gSetupButtonOK, &OK
-	Gui, Setup:Add, Button, x157 y110 w90 h30 Disabled gSetupButtonDone , &Done
-	Gui, Setup:Add, Button, x302 y110 w90 h30 gSetupButtonCancel, &Cancel
-	Gui, Setup:Show, x127 y87 h160 w404, Pick a Library
+	EditRetry:
+	Gui, Edit:Add, Text, x12 y10 w380 h30 , Edit the various cards for %Library%
+	Gui, Edit:Add, Text, x12 y33 w380 h20 , Catalog Changes:
+	Gui, Edit:Add, Edit, x100 y33 w292 h20 Limit14 vCCCN Number, %CCCN%
+	Gui, Edit:Add, Text, x12 y58 w380 h20 , Hold Shelf:
+	Gui, Edit:Add, Edit, x100 y58 w292 h20 Limit14 vHSCN Number, %HSCN%
+	Gui, Edit:Add, Text, x12 y83 w380 h20 , Problem Material:
+	Gui, Edit:Add, Edit, x100 y83 w292 h20 Limit14 vPMCN Number, %PMCN%
+	Gui, Edit:Add, Button, x12 y110 w90 h30 Default gEditButtonOK, &OK
+	Gui, Edit:Add, Button, x157 y110 w90 h30 Disabled gEditButtonDone , &Done
+	Gui, Edit:Add, Button, x302 y110 w90 h30 gEditButtonCancel, &Cancel
+	Gui, Edit:Show, x127 y87 h160 w404, Pick a Library
 	Return
 
 
-	SetupButtonCancel:
-	SetupGuiClose:
-	SetupGuiEscape:
-		Gui, Setup:Destroy
-		MsgBox, 4, Setup Canceled. , Setup Canceled.  Do you wish to continue?
-		IfMsgBox Yes
-		{
-			Goto, LibraryButtonOk
-		}
-		else
-		{
-			ExitApp
-		}
+	EditButtonCancel:
+	EditGuiClose:
+	EditGuiEscape:
+		Gui, Edit:Destroy
+		Goto, libraryCountLabel
 		
-	SetupButtonOK:
-	SetupButtonDone:
-		Gui, Setup:Submit
-		Gui, Setup:Destroy
+	EditButtonOK:
+	EditButtonDone:
+		Gui, Edit:Submit
+		Gui, Edit:Destroy
 		
 		checkINIReturn := checkINI(CCCN,HSCN,PMCN)
 		
@@ -285,10 +326,11 @@ LibraryButtonSetup:
 			IniWrite, %CCCN%, %settings%, %Library%, CatalogChangesCardNumber
 			IniWrite, %HSCN%, %settings%, %Library%, HoldShelfCardNumber
 			IniWrite, %PMCN%, %settings%, %Library%, ProblemMaterialCardNumber
+			Goto, LibrarySkip
 		}
 		else
 		{
-			GoTo, SetupRetry
+			GoTo, EditRetry
 		}
 
 LibraryButtonOK:
@@ -613,6 +655,7 @@ Return
 			; If item is never returned either due to lag
 			; or the item simply doesn't exist, alert the
 			; user and break the script.
+			i = 0
 			retryNPU:
 			ControlGet, OutputVar, List, Selected Col9, SysListView321, Item Records
 				if (ErrorLevel or OutputVar = "")
@@ -783,8 +826,9 @@ Return
 			; If item is never returned either due to lag
 			; or the item simply doesn't exist, alert the
 			; user and break the script.
+			i = 0
 			retryUnvlbl:
-			ControlGet, OutputVar, List, Selected Col9, SysListView321, Item Records
+			ControlGet, OutputVar, List, Selected Col9, SysListView321, Item Records - Barcode Find Tool
 				if (ErrorLevel or OutputVar = "")
 				{
 					if (i < ItemRecordIterations)
