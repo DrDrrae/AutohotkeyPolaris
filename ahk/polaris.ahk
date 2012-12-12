@@ -22,8 +22,6 @@ IfWinNotExist, Polaris ILS
 	ExitApp
 }
 
-FileInstall, Z:\settingsDefault.ini, settings.ini, 0
-
 ;********************************
 ;*
 ;* Fuctions
@@ -142,7 +140,6 @@ checkINI(CCCN,HSCN,PMCN)
 	Return, true
 }
 
-
 breakScript(type = 0)
 {
 	if (type = npu)
@@ -207,6 +204,28 @@ else
 	log = ./log.txt
 }
 
+;********************************
+;*
+;* Upgrades
+;* Probably should be put into another script
+;* To be used whenever the format of the
+;* INI files changes significantly and can't
+;* be reasonbly worked around.  Usually
+;* resulting a a complete refresh of the INI
+;* file.
+;*
+;********************************
+IniRead, Version, %settings%, Version, Version, 0
+;* First version.  Format changed significantly.
+;* Easiest to purge the old file and start anew.
+if (Version > 0.01)
+{
+	FileInstall, Z:\settingsDefault.ini, %settings%, 1
+}
+
+FileInstall, Z:\settingsDefault.ini, %settings%, 0
+Sleep, 500
+
 IniRead, Libraries, %settings%
 IniRead, DefaultLibrary, %settings%, Default, Library
 StringReplace, Libraries, Libraries, Default`n
@@ -231,22 +250,31 @@ Loop, Parse, Libraries, `n
 }
 Sort Libraries2, CL D|
 
-if (InStr(Libraries2,DefaultLibrary)>0)
-{
-	StringReplace, Libraries2, Libraries2, %DefaultLibrary%, %DefaultLibrary%|
-}
-else
-{
-	StringReplace, Libraries2, Libraries2, |, ||
-}
-
 libraryCountLabel:
-if (libraryCount > 0)
+if (libraryCount < 1)
 {
+	MsgBox, No Libraries Enabled.
+	Goto, SetupRetry
+}
+	
+if (libraryCount > 1)
+{
+	;if (InStr(Libraries2,DefaultLibrary)>0)
+	ifInString, Libraries2, %DefaultLibrary%
+	{
+		StringReplace, Libraries2, Libraries2, %DefaultLibrary%, %DefaultLibrary%|
+		DefaultLibrary2=%DefaultLibrary%||
+		ifNotInString, Libraries2, %DefaultLibrary2%
+			StringReplace, Libraries2, Libraries2, %DefaultLibrary%, %DefaultLibrary%|
+	}
+	else
+	{
+		StringReplace, Libraries2, Libraries2, |, ||
+	}
 	Gui, Library:Add, Text, x12 y10 w380 h30 , Pick a Baltimore County Public Library Branch
 	Gui, Library:Add, Text, x12 y35 w380 h30 , The branches are pulled from the settings.ini file.
 	Gui, Library:Add, Text, x12 y65 w380 h20 , Library:
-	Gui, Library:Add, DropDownList, x12 y80 w320 vLibrary, %Libraries2%
+	Gui, Library:Add, DropDownList, x12 y80 w320 Sort vLibrary, %Libraries2%
 	Gui, Library:Add, Button, x340 y80 w40 h20 gLibraryButtonEdit, &Edit
 	Gui, Library:Add, Button, x12 y110 w90 h30 Default gLibraryButtonOK, &OK
 	Gui, Library:Add, Button, x157 y110 w90 h30 gLibraryButtonSetup , &Setup
@@ -257,7 +285,7 @@ if (libraryCount > 0)
 else
 {
 	Library = %Libraries2%
-	;MsgBox %Library%
+	;MsgBox, Library: %Library%
 	Goto, LibrarySkip
 }
 
@@ -268,22 +296,11 @@ LibraryButtonCancel:
 	ExitApp
 	
 LibraryButtonSetup:
-	Gui, Library:Submit
-	Gui, Library:Destroy
-	IniRead, librarySetup, %settings%
 	SetupRetry:
-	Gui, Setup:Add, Text, x12 y10 w380 h30 , Enable or disable libraries.
-	Gui, Setup:Add, Text, x12 y33 w380 h20 , Catalog Changes:
-	Gui, Setup:Add, Checkbox, x12 y33 w380 h20 vEditArbutus, Arbutus
-	Gui, Setup:Add, Button, x12 y110 w90 h30 Default gSetupButtonOK, &OK
-	Gui, Setup:Add, Button, x157 y110 w90 h30 Disabled gSetupButtonDone , &Done
-	Gui, Setup:Add, Button, x302 y110 w90 h30 gSetupButtonCancel, &Cancel
-	Gui, Setup:Show, x127 y87 h160 w404, Pick a Library
-	Return
-	
-	SetupButtonOK:
-	SetupButtonDone:
-	SetupButtonCancel:
+	if (A_IsCompiled)
+		Run, PolarisSetupAHK.exe
+	else
+		Run, Z:\AutoHotkey\AutoHotkeyU64.exe Z:\ahk\Setup.ahk
 	ExitApp
 
 LibraryButtonEdit:
